@@ -1,0 +1,6 @@
+{
+  "do_token": "xxxx",
+  "base_system_image": "ubuntu-20-04-x64",
+  "region": "tor1",
+  "size": "s-1vcpu-1gb"
+}

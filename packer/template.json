@@ -1,0 +1,121 @@
+{
+  "builders": [
+    {
+      "type": "digitalocean",
+      "api_token": "{{user `do_token`}}",
+      "image": "{{user `base_system_image`}}",
+      "region": "{{user `region`}}",
+      "size": "{{user `size`}}",
+      "ssh_username": "root"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sleep 30",
+        "sudo apt-get clean",
+        "sudo apt-get update",
+        "sudo apt-get install -y apt-transport-https ca-certificates nfs-common",
+        "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
+        "curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -",
+        "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
+        "sudo apt-add-repository \"deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main\"",
+        "sudo apt-get update",
+        "sudo apt-get install -y docker-ce nomad consul vault ufw unzip",
+        "sudo curl -L \"https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)\" -o /usr/local/bin/docker-compose",
+        "sudo chmod +x /usr/local/bin/docker-compose",
+        "wget https://releases.hashicorp.com/consul-template/0.25.1/consul-template_0.25.1_linux_amd64.zip",
+        "unzip consul-template_0.25.1_linux_amd64.zip",
+        "cp consul-template /usr/local/bin/consul-template",
+        "sudo chmod +x /usr/local/bin/consul-template",
+        "sudo mkdir -p /root/nomad/jobs"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "consul/configure_consul.sh",
+      "destination": "/root/configure_consul.sh"
+    },
+    {
+      "type": "file",
+      "source": "consul/consul-server.service",
+      "destination": "/etc/systemd/system/consul-server.service"
+    },
+    {
+      "type": "file",
+      "source": "consul/consul-connect-enable.hcl",
+      "destination": "/root/consul-connect-enable.hcl"
+    },
+    {
+      "type": "file",
+      "source": "consul/consul-client.service",
+      "destination": "/etc/systemd/system/consul-client.service"
+    },
+    {
+      "type": "file",
+      "source": "nomad/nomad-server.hcl",
+      "destination": "/root/nomad-server.hcl"
+    },
+    {
+      "type": "file",
+      "source": "nomad/nomad-client.hcl",
+      "destination": "/root/nomad-client.hcl"
+    },
+    {
+      "type": "file",
+      "source": "nomad/configure_nomad.sh",
+      "destination": "/root/configure_nomad.sh"
+    },
+    {
+      "type": "file",
+      "source": "nomad/nomad-client.service",
+      "destination": "/etc/systemd/system/nomad-client.service"
+    },
+    {
+      "type": "file",
+      "source": "nomad/nomad-server.service",
+      "destination": "/etc/systemd/system/nomad-server.service"
+    },
+    {
+      "type": "file",
+      "source": "nomad/jobs/traefik.nomad",
+      "destination": "/root/nomad/jobs/traefik.nomad"
+    },
+    {
+      "type": "file",
+      "source": "nomad/jobs/jessequinn.nomad",
+      "destination": "/root/nomad/jobs/jessequinn.nomad"
+    },
+    {
+      "type": "file",
+      "source": "nomad/jobs/scidoc.nomad",
+      "destination": "/root/nomad/jobs/scidoc.nomad"
+    },
+    {
+      "type": "file",
+      "source": "nomad/jobs/fabio.nomad",
+      "destination": "/root/nomad/jobs/fabio.nomad"
+    },
+    {
+      "type": "file",
+      "source": "vault/vault-config.hcl",
+      "destination": "/root/vault-config.hcl"
+    },
+    {
+      "type": "file",
+      "source": "vault/vault-server.service",
+      "destination": "/etc/systemd/system/vault-server.service"
+    },
+    {
+      "type": "file",
+      "source": "vault/enable_vault.sh",
+      "destination": "/root/enable_vault.sh"
+    },
+    {
+      "type": "file",
+      "source": "vault/init_vault.sh",
+      "destination": "/root/init_vault.sh"
+    }
+  ]
+}
